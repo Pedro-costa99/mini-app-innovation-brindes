@@ -1,40 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Innovation Brindes — Mini App / Versão 0001
 
-## Getting Started
+Aplicação desenvolvida em **Next.js + TypeScript + TailwindCSS** para teste técnico.  
+Inclui fluxo de autenticação, gerenciamento de sessão com **Zustand**, favoritos persistidos e listagem de produtos.
 
-First, run the development server:
+## 🚀 Como rodar o projeto
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Clone o repositório, instale as dependências com `npm install` e rode o servidor de desenvolvimento com `npm run dev`.  
+O projeto ficará disponível em `http://localhost:3000`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔑 Variáveis de ambiente
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+Crie um arquivo `.env.local` na raiz do projeto com a variável:
+NEXT_PUBLIC_API_BASE=https://sua-api.com
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Essa variável define a URL base para as chamadas de API.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## 🛠️ Decisões técnicas
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: [Next.js](https://nextjs.org/) escolhido pela simplicidade e suporte a SSR/SSG.  
+- **Estilização**: [TailwindCSS](https://tailwindcss.com/) para agilizar a construção da interface.  
+- **Gerenciamento de estado global**: [Zustand](https://github.com/pmndrs/zustand) para controlar autenticação e favoritos com persistência em storage.  
+- **Autenticação**: controle de sessão via token JWT, armazenado em `localStorage` quando a opção *remember me* está ativa.  
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+## ⚠️ O que ficou pendente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+- Implementação de tratamento avançado de erros de rede (ex.: refresh automático de token).  
+- Testes automatizados (unitários e de integração).  
+- Ajustes finos de layout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🌐 Deploy
 
-## Deploy on Vercel
+O projeto foi implantado na **Vercel** e pode ser acessado nos links (necessário autenticação):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- [Página inicial](https://mini-app-innovation-brindes.vercel.app/)  
+- [Login](https://mini-app-innovation-brindes.vercel.app/login)  
+- [Produtos](https://mini-app-innovation-brindes.vercel.app/produtos)
