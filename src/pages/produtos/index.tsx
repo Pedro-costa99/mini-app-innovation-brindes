@@ -62,6 +62,7 @@ function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reloadTick, setReloadTick] = useState(0);
 
   // infinite scroll
   const [page, setPage] = useState(1);
@@ -79,56 +80,53 @@ function ProductsContent() {
   // modal
   const [selected, setSelected] = useState<Product | null>(null);
 
-  // carregar da API
-  async function loadProducts(query?: string) {
-    setError("");
-    setLoading(true);
-    try {
-      const queryText = query?.trim();
+  // ===== BUSCA (carga inicial + search) =====
+  useEffect(() => {
+    const queryText = debouncedBusca.trim();
+    const controller = new AbortController();
 
-      if (queryText) {
-        const isCodigo =
-          /^\d+$/.test(queryText) ||
-          (/\d/.test(queryText) && !/\s/.test(queryText));
-        const payload = isCodigo
-          ? { codigo_produto: queryText }
-          : { nome_produto: queryText };
+    async function run() {
+      setError("");
+      setLoading(true);
+      try {
+        const url = "/api/innova-dinamica/produtos/listar";
+        const isCode = (s: string) =>
+          /^\d+$/.test(s) || (/\d/.test(s) && !/\s/.test(s));
 
-        const { data } = await api.post(
-          "/api/innova-dinamica/produtos/listar",
-          payload
-        );
+        const request = queryText
+          ? api.post(
+              url,
+              isCode(queryText)
+                ? { codigo_produto: queryText }
+                : { nome_produto: queryText },
+              { signal: controller.signal }
+            )
+          : api.get(url, { signal: controller.signal });
+
+        const { data } = await request;
+        if (controller.signal.aborted) return;
+
         setProducts(toArray<Product>(data));
-      } else {
-        const { data } = await api.get("/api/innova-dinamica/produtos/listar");
-        setProducts(toArray<Product>(data));
+        setPage(1); // reseta paginação ao trocar a fonte de dados
+      } catch (e: any) {
+        if (e?.code === "ERR_CANCELED") return;
+        if (e?.response?.status === 401) {
+          clearToken();
+          router.replace("/login");
+          return;
+        }
+        setError("Não foi possível carregar os products. Tente novamente.");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-      setPage(1);
-    } catch (e: any) {
-      if (e?.response?.status === 401) {
-        clearToken();
-        router.replace("/login");
-        return;
-      }
-      setError("Não foi possível carregar os products. Tente novamente.");
-    } finally {
-      setLoading(false);
     }
-  }
 
-  // primeira carga
-  useEffect(() => {
-    loadProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    run();
+    return () => controller.abort();
+    // reloadTick permite "Tentar novamente"
+  }, [debouncedBusca, reloadTick, router]);
 
-  // search com debounce
-  useEffect(() => {
-    loadProducts(debouncedBusca.trim() || undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedBusca]);
-
-  // base list (considerando favorites)
+  // ===== BASE LIST (favoritos) =====
   const baseList: Product[] = useMemo(() => {
     const productsSaved = Array.isArray(products) ? products : [];
     if (!onlyFav) return productsSaved;
@@ -137,14 +135,18 @@ function ProductsContent() {
     return productsSaved.filter((p) => favMap.has(p.codigo));
   }, [products, onlyFav, favorites]);
 
-  // ordenação
+  // ===== ORDENAÇÃO =====
   const productsOrdered = useMemo<Product[]>(() => {
     const arr = [...(Array.isArray(baseList) ? baseList : [])];
     switch (order) {
       case "nome-asc":
-        return arr.sort((a, b) => a.nome.localeCompare(b.nome));
+        return arr.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
       case "nome-desc":
-        return arr.sort((a, b) => b.nome.localeCompare(a.nome));
+        return arr.sort((a, b) =>
+          b.nome.localeCompare(a.nome, "pt-BR", { sensitivity: "base" })
+        );
       case "preco-asc":
         return arr.sort((a, b) => Number(a.preco) - Number(b.preco));
       case "preco-desc":
@@ -154,22 +156,24 @@ function ProductsContent() {
     }
   }, [baseList, order]);
 
-  // paginação client
+  // ===== PAGINAÇÃO CLIENT =====
   const total = productsOrdered.length;
   const maxPages = Math.max(1, Math.ceil(total / BATCH_SIZE));
   const safePage = Math.min(page, maxPages);
   const visible = productsOrdered.slice(0, safePage * BATCH_SIZE);
   const hasMore = !onlyFav && safePage < maxPages;
 
-  // reset ao mudar order/fav
+  // reset página ao mudar ordenação/fav
   useEffect(() => {
     setPage(1);
   }, [order, onlyFav]);
 
-  // carregar mais (observer)
+  // ===== INFINITE SCROLL OBSERVER =====
   useEffect(() => {
-    if (!isIntersecting || !hasMore || loading || loadingMoreRef.current)
-      return;
+    if (!isIntersecting) return;
+    if (!hasMore) return;
+    if (loading) return;
+    if (loadingMoreRef.current) return;
     loadingMoreRef.current = true;
     setLoadingMore(true);
     const t = setTimeout(() => {
@@ -192,7 +196,7 @@ function ProductsContent() {
       <Navbar />
 
       <main className="min-h-screen bg-gray-50 p-6">
-        {/* Header com filtros + logout */}
+        {/* Header com filtros */}
         <header className="mx-auto mb-4 flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1">
             <input
@@ -259,7 +263,7 @@ function ProductsContent() {
           <div className="mx-auto mb-4 max-w-6xl rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             {error}{" "}
             <button
-              onClick={() => loadProducts(debouncedBusca.trim() || undefined)}
+              onClick={() => setReloadTick((n) => n + 1)}
               className="underline"
             >
               Tentar novamente
@@ -297,7 +301,6 @@ function ProductsContent() {
                           p.nome.slice(1).toLowerCase()
                         : ""}
                     </h2>
-
                     <p className="-mt-0.5 text-[13px] font-normal text-gray-700">
                       {p.codigo}
                     </p>
@@ -368,7 +371,6 @@ function ProductsContent() {
                           "#65A30D",
                           "#374151",
                           "#F3F4F6",
-
                           "#9A3412",
                           "#22C55E",
                           "#06B6D4",
@@ -414,33 +416,37 @@ function ProductsContent() {
 
             {!onlyFav && (
               <>
-                <div
-                  ref={sentinelRef}
-                  className="mx-auto flex h-12 max-w-6xl items-center justify-center"
-                >
-                  {loadingMore && (
-                    <span className="text-sm text-gray-500">
-                      Carregando mais...
-                    </span>
-                  )}
-                  {!(safePage < Math.max(1, Math.ceil(total / BATCH_SIZE))) &&
-                    total > 0 && (
+                {hasMore ? (
+                  <div
+                    ref={sentinelRef}
+                    className="mx-auto flex h-12 max-w-6xl items-center justify-center"
+                  >
+                    {loadingMore && (
+                      <span className="text-sm text-gray-500">
+                        Carregando mais...
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  total > 0 && (
+                    <div className="mx-auto flex h-10 max-w-6xl items-center justify-center">
                       <span className="text-sm text-gray-400">
                         Fim da lista
                       </span>
-                    )}
-                </div>
-                {safePage < Math.max(1, Math.ceil(total / BATCH_SIZE)) &&
-                  !loadingMore && (
-                    <div className="mx-auto mt-2 max-w-6xl text-center">
-                      <button
-                        onClick={() => setPage((p) => p + 1)}
-                        className="rounded border bg-white px-4 py-2 text-sm shadow hover:bg-gray-50"
-                      >
-                        Carregar mais
-                      </button>
                     </div>
-                  )}
+                  )
+                )}
+
+                {hasMore && !loadingMore && (
+                  <div className="mx-auto mt-2 max-w-6xl text-center">
+                    <button
+                      onClick={() => setPage((p) => p + 1)}
+                      className="rounded border bg-white px-4 py-2 text-sm shadow hover:bg-gray-50"
+                    >
+                      Carregar mais
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </>
