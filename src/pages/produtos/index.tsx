@@ -52,7 +52,7 @@ export default function ProductsPage() {
 function ProductsContent() {
   const router = useRouter();
   const [search, setBusca] = useState("");
-  const debouncedBusca = useDebounce(search, 400);
+  const debouncedSearch = useDebounce(search, 400);
   const [order, setOrder] = useState<
     "" | "nome-asc" | "nome-desc" | "preco-asc" | "preco-desc"
   >("");
@@ -82,7 +82,16 @@ function ProductsContent() {
 
   // ===== BUSCA (carga inicial + search) =====
   useEffect(() => {
-    const queryText = debouncedBusca.trim();
+    function normalizeSearch(text: string): string {
+      return text
+        .normalize("NFD") // separa acentos
+        .replace(/[\u0300-\u036f]/g, "") // remove marcas de acento
+        .replace(/\s+/g, " ") // reduz múltiplos espaços
+        .trim()
+        .toLowerCase(); // força minúsculo
+    }
+
+    const queryText = normalizeSearch(debouncedSearch);
     const controller = new AbortController();
 
     async function run() {
@@ -126,7 +135,7 @@ function ProductsContent() {
     run();
     return () => controller.abort();
     // reloadTick permite "Tentar novamente"
-  }, [debouncedBusca, reloadTick, router]);
+  }, [debouncedSearch, reloadTick, router]);
 
   // ===== BASE LIST (favoritos) =====
   const baseList: Product[] = useMemo(() => {
