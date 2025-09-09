@@ -27,8 +27,11 @@ export default function ProductModal({
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="w-full max-w-lg rounded-2xl bg-white p-6 shadow">
-          <DialogTitle className="text-xl font-bold">
-            {product.nome}
+          <DialogTitle className="text-xl font-bold text-black">
+            {product.nome
+              ? product.nome.charAt(0).toUpperCase() +
+                product.nome.slice(1).toLowerCase()
+              : ""}
           </DialogTitle>
 
           <img
