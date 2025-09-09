@@ -38,4 +38,4 @@ O projeto foi implantado na **Vercel** e pode ser acessado nos links (necessári
 - [Produtos](https://mini-app-innovation-brindes.vercel.app/produtos)
 
 # App - Desktop
-![App - Desktop](/images/img-desktop.png)
+![App - Desktop](public/images/img-desktop.png)
