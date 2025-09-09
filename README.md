@@ -40,5 +40,9 @@ O projeto foi implantado na **Vercel** e pode ser acessado nos links (necessári
 - [Login](https://mini-app-innovation-brindes.vercel.app/login)  
 - [Produtos](https://mini-app-innovation-brindes.vercel.app/produtos)
 
-# App - Desktop
-![App - Desktop](public/images/img-desktop.png)
+
+# App - Tela de Login Desktop
+![Tela de Login Desktop](public/images/screen_login.png)
+
+# App - Tela de produtos Desktop
+![Tela de produtos Desktop](public/images/img-desktop.png)
