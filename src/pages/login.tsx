@@ -143,7 +143,7 @@ export default function LoginPage() {
                 className="text-[13px] text-white/95 hover:underline underline-offset-2"
                 aria-disabled="true"
               >
-                Esqueceu a password?
+                Esqueceu a senha?
               </a>
             </div>
 
