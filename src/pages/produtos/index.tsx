@@ -108,6 +108,8 @@ function ProductsContent() {
 
         setProducts(toArray<Product>(data));
         setPage(1); // reseta paginação ao trocar a fonte de dados
+        setLoadingMore(false);
+        loadingMoreRef.current = false;
       } catch (e: any) {
         if (e?.code === "ERR_CANCELED") return;
         if (e?.response?.status === 401) {
@@ -166,6 +168,8 @@ function ProductsContent() {
   // reset página ao mudar ordenação/fav
   useEffect(() => {
     setPage(1);
+    setLoadingMore(false);
+    loadingMoreRef.current = false;
   }, [order, onlyFav]);
 
   // ===== INFINITE SCROLL OBSERVER =====
@@ -176,12 +180,10 @@ function ProductsContent() {
     if (loadingMoreRef.current) return;
     loadingMoreRef.current = true;
     setLoadingMore(true);
-    const t = setTimeout(() => {
-      setPage((p) => p + 1);
-      setLoadingMore(false);
-      loadingMoreRef.current = false;
-    }, 250);
-    return () => clearTimeout(t);
+    setPage((p) => p + 1);
+
+    setLoadingMore(false);
+    loadingMoreRef.current = false;
   }, [isIntersecting, hasMore, loading]);
 
   return (
