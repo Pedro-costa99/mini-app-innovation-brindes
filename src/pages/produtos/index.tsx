@@ -8,6 +8,7 @@ import useDebounce from "@/hooks/useDebounce";
 import useIntersection from "@/hooks/useIntersection";
 import { useFavorites } from "@/store/useFavorites";
 import Navbar from "@/components/Navbar";
+import Image from "next/image";
 
 const ProductModal = dynamic(() => import("@/components/ProductModal"), {
   ssr: false,
@@ -330,11 +331,9 @@ function ProductsContent() {
                     >
                       {isFavorito(p.codigo) ? "★" : "☆"}
                     </button>
-
                     <span className="absolute bg-cyan-500/10 right-2 top-2 text-[12px] font-bold uppercase tracking-wide text-sky-600">
                       EXCLUSIVO!
                     </span>
-
                     <div className="mt-5">
                       <img
                         src={p.imagem}
@@ -343,32 +342,27 @@ function ProductsContent() {
                         loading="lazy"
                       />
                     </div>
-
-                    <div className="mt-3 flex items-center gap-2">
-                      <svg
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        className="text-[#7CB800]"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M12 2 3 7l9 5 9-5-9-5Zm0 7L3 4v13l9 5 9-5V4l-9 5Z"
-                          opacity="0.85"
-                        />
-                      </svg>
-                      <p className="text-[12px] font-semibold text-gray-700 leading-tight">
-                        com embalagem{" "}
-                        <span className="font-bold">especial</span>
-                      </p>
+                    <div className="mt-3 inline-flex items-center rounded-r border border-l-0 border-gray-300 bg-white px-2.5 py-1.5">
+                      <Image
+                        src="/images/img-box.png"
+                        alt="Com embalagem especial"
+                        width={50}
+                        height={50}
+                        className="shrink-0"
+                      />
+                      <div className="ml-2 leading-tight">
+                        <span className="block text-[12px] font-semibold text-gray-700">
+                          com embalagem
+                        </span>
+                        <span className="block text-[12px] font-bold text-gray-700">
+                          especial
+                        </span>
+                      </div>
                     </div>
-
                     <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-700">
                       {p.descricao ||
                         "Caneta plástica com funções esferográfica e marca texto, com..."}
                     </p>
-
                     <div className="mt-3">
                       <p className="text-[12px] font-semibold text-gray-700">
                         Cores:
@@ -398,7 +392,6 @@ function ProductsContent() {
                         ))}
                       </div>
                     </div>
-
                     <div className="mt-3 flex justify-end text-right">
                       <div>
                         <p className="text-[12px] text-gray-500">a partir de</p>
