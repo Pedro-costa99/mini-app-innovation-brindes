@@ -196,30 +196,51 @@ function ProductsContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <select
-              value={order}
-              onChange={(e) => setOrder(e.target.value as any)}
-              className="rounded-lg border bg-white p-2"
-              aria-label="Ordenar"
-            >
-              <option value="">Ordenar...</option>
-              <option value="nome-asc">Nome (A → Z)</option>
-              <option value="nome-desc">Nome (Z → A)</option>
-              <option value="preco-asc">Preço (menor → maior)</option>
-              <option value="preco-desc">Preço (maior → menor)</option>
-            </select>
+            <div className="relative inline-block w-48">
+              <select
+                value={order}
+                onChange={(e) => setOrder(e.target.value as any)}
+                className="w-full appearance-none rounded-[2px] border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 shadow-sm outline-none focus:border-[#80BC04] focus:ring-2 focus:ring-[#80BC04]/40"
+                aria-label="Order"
+              >
+                <option value="">Ordernar por</option>
+                <option value="name-asc">Nome (A → Z)</option>
+                <option value="name-desc">Nome (Z → A)</option>
+                <option value="price-asc">Preço (low → high)</option>
+                <option value="price-desc">Preço (high → low)</option>
+              </select>
+
+              {/* seta custom */}
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                <svg
+                  className="h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </div>
 
             <button
               onClick={() => setOnlyFav((v) => !v)}
-              className={`rounded border px-3 py-2 ${
-                onlyFav
-                  ? "bg-yellow-400 text-white"
-                  : "bg-white hover:bg-gray-50"
-              }`}
               aria-pressed={onlyFav}
-              title="Mostrar apenas favorites"
+              title="Show only favorites"
+              className={`inline-flex items-center gap-2 rounded-[2px] border px-2 py-1 text-sm font-medium shadow-sm transition ${
+                onlyFav
+                  ? "bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+              }`}
             >
-              {onlyFav ? "★ Favoritos" : "☆ Favoritos"}
+              <span className="text-lg">{onlyFav ? "★" : "☆"}</span>
+              Favoritos
             </button>
           </div>
         </header>
@@ -229,9 +250,7 @@ function ProductsContent() {
           <div className="mx-auto mb-4 max-w-6xl rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             {error}{" "}
             <button
-              onClick={() =>
-                loadProducts(debouncedBusca.trim() || undefined)
-              }
+              onClick={() => loadProducts(debouncedBusca.trim() || undefined)}
               className="underline"
             >
               Tentar novamente
