@@ -25,9 +25,12 @@ Essa variável define a URL base para as chamadas de API.
 
 ## ⚠️ O que ficou pendente
 
-- Implementação de tratamento avançado de erros de rede (ex.: refresh automático de token).  
-- Testes automatizados (unitários e de integração).  
-- Ajustes finos de layout
+- Lighthouse (no DevTools) ≥ 90 em Performance e Acessibilidade (desktop)
+- Dark mode (toggle, preferências salvas).
+- 1–2 testes unitários (Vitest/Jest + React Testing Library) para componentes de UI.  
+- 1 smoke E2E (Playwright) que valide fluxo: login → ver grid.
+- Tratamento de estados refinado (ex.: placeholder de imagem, retry/backoff)
+- guardar o estado do usuário em estado global pra usar oportunamente, no Navbar por exemplo.
 
 ## 🌐 Deploy
 
