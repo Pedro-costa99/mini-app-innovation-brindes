@@ -84,10 +84,19 @@ function ProductsContent() {
     setError("");
     setLoading(true);
     try {
-      if (query) {
+      const queryText = query?.trim();
+
+      if (queryText) {
+        const isCodigo =
+          /^\d+$/.test(queryText) ||
+          (/\d/.test(queryText) && !/\s/.test(queryText));
+        const payload = isCodigo
+          ? { codigo_produto: queryText }
+          : { nome_produto: queryText };
+
         const { data } = await api.post(
           "/api/innova-dinamica/produtos/listar",
-          { nome_produto: query, codigo_produto: query }
+          payload
         );
         setProducts(toArray<Product>(data));
       } else {
