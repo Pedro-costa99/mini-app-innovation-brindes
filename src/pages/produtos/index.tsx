@@ -86,12 +86,12 @@ function ProductsContent() {
     try {
       if (query) {
         const { data } = await api.post(
-          "/api/innova-dinamica/products/listar",
+          "/api/innova-dinamica/produtos/listar",
           { nome_produto: query, codigo_produto: query }
         );
         setProducts(toArray<Product>(data));
       } else {
-        const { data } = await api.get("/api/innova-dinamica/products/listar");
+        const { data } = await api.get("/api/innova-dinamica/produtos/listar");
         setProducts(toArray<Product>(data));
       }
       setPage(1);
