@@ -70,7 +70,7 @@ Essa variável define a URL base para as chamadas de API.
 
 ## Entrega
 - ✅ Repositório público
-- ⚠️ **README**: incluir passos, `.env`, decisões/pontos pendentes, screenshot Lighthouse e GIF do fluxo
+- ⚠️ **README**: screenshot Lighthouse e GIF do fluxo
 
 
 ## 🌐 Deploy
