@@ -201,13 +201,13 @@ function ProductsContent() {
                 value={order}
                 onChange={(e) => setOrder(e.target.value as any)}
                 className="w-full appearance-none rounded-[2px] border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 shadow-sm outline-none focus:border-[#80BC04] focus:ring-2 focus:ring-[#80BC04]/40"
-                aria-label="Order"
+                aria-label="Ordenar"
               >
-                <option value="">Ordernar por</option>
-                <option value="name-asc">Nome (A → Z)</option>
-                <option value="name-desc">Nome (Z → A)</option>
-                <option value="price-asc">Preço (low → high)</option>
-                <option value="price-desc">Preço (high → low)</option>
+                <option value="">Ordenar por</option>
+                <option value="nome-asc">Nome (A → Z)</option>
+                <option value="nome-desc">Nome (Z → A)</option>
+                <option value="preco-asc">Preço (low → high)</option>
+                <option value="preco-desc">Preço (high → low)</option>
               </select>
 
               {/* seta custom */}
