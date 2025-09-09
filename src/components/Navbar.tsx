@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { clearToken } from "@/utils/authStorage";
+import userAvatar from "@/public/images/user.png";
 
 type NavbarProps = {
   userName?: string;
@@ -39,7 +40,7 @@ function formatTodayPtBR() {
 export default function Navbar({
   userName = "Ana Carol Machado",
   userSubtext,
-  avatarSrc = "/avatars/default.jpg",
+  avatarSrc = "",
   showIcons = true,
   mailBadge = 11,
   phoneBadge = 11,
@@ -117,13 +118,13 @@ export default function Navbar({
               </div>
             )}
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white/90">
+              <div className="h-12 w-12 overflow-hidden rounded-full">
                 <Image
-                  src={avatarSrc}
+                  src="/images/user.png"
                   alt={userName}
-                  width={36}
-                  height={36}
-                  className="object-cover"
+                  width={66}
+                  height={66}
+                  className="h-full w-full object-cover"
                 />
               </div>
               <div className="hidden text-right text-white sm:block">
