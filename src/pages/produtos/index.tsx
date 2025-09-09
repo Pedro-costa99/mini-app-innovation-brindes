@@ -199,7 +199,7 @@ function ProductsContent() {
               value={search}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome ou código..."
-              className="w-full rounded-lg border bg-white p-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border bg-white p-2 text-black placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
               disabled={onlyFav}
             />
           </div>
