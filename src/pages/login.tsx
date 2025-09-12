@@ -3,7 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import api from "@/lib/api";
 import { setToken } from "@/utils/authStorage";
-import { useAuthUser } from "@/store/authUser"; // ⬅️ novo
+import { useAuthUser } from "@/store/authUser";
 
 type LoginResponse = {
   status: number; // 1 ok, 0 erro
@@ -24,8 +24,6 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formErr, setFormErr] = useState("");
-  
-  // pega setter do store
   const setUser = useAuthUser((s) => s.setUser);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -39,15 +37,11 @@ export default function LoginPage() {
       );
 
       if (data.status === 1 && data.token_de_acesso) {
-        // token
         setToken(data.token_de_acesso, remember);
-        // cookie opcional p/ middleware
         if (typeof document !== "undefined") {
           document.cookie = `auth_token=${data.token_de_acesso}; path=/; SameSite=Lax`;
         }
-        // guarda usuário no Zustand (normalizado)
         setUser(data.dados_usuario ?? null);
-
         router.push("/produtos");
       } else {
         setFormErr(data.message || "Email ou password inválidos.");
@@ -87,11 +81,13 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
           aria-describedby={formErr ? "form-error" : undefined}
           className="relative z-10 w-[92%] max-w-[560px] rounded-3xl bg-[#80BC04] px-10 pt-24 pb-12 shadow-2xl"
+          noValidate
         >
           {formErr && (
             <div
               id="form-error"
               role="alert"
+              aria-live="assertive"
               className="mb-4 rounded-xl border border-red-200 bg-red-50/90 p-3 text-sm text-red-700"
             >
               {formErr}
@@ -100,8 +96,13 @@ export default function LoginPage() {
 
           <div className="mx-auto w-[86%] max-w-[400px]">
             <div className="space-y-3">
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-gray-500">
+              {/* Usuário */}
+              <label htmlFor="email" className="relative block">
+                <span className="sr-only">Usuário</span>
+                <span
+                  className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-gray-500"
+                  aria-hidden="true"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -112,17 +113,27 @@ export default function LoginPage() {
                   </svg>
                 </span>
                 <input
+                  id="email"
+                  name="username"
+                  type="email"
                   className="h-14 w-full rounded-full bg-white pl-14 pr-4 text-[15px] text-gray-700 placeholder:text-gray-500 outline-none focus:outline-none"
                   placeholder="Usuário"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="username"
+                  aria-invalid={formErr ? true : undefined}
+                  aria-describedby={formErr ? "form-error" : undefined}
                 />
-              </div>
+              </label>
 
-              <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-gray-500">
+              {/* Senha */}
+              <label htmlFor="password" className="relative block">
+                <span className="sr-only">Senha</span>
+                <span
+                  className="pointer-events-none absolute inset-y-0 left-5 flex items-center text-gray-500"
+                  aria-hidden="true"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -133,6 +144,8 @@ export default function LoginPage() {
                   </svg>
                 </span>
                 <input
+                  id="password"
+                  name="password"
                   type="password"
                   className="h-14 w-full rounded-full bg-white pl-14 pr-4 text-[15px] text-gray-700 placeholder:text-gray-500 outline-none focus:outline-none"
                   placeholder="Senha"
@@ -140,13 +153,19 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
+                  aria-invalid={formErr ? true : undefined}
+                  aria-describedby={formErr ? "form-error" : undefined}
                 />
-              </div>
+              </label>
             </div>
 
             <div className="mt-3 mb-6 flex items-center justify-between">
-              <label className="inline-flex items-center gap-2 text-[13px] text-white/95">
+              <label
+                htmlFor="remember"
+                className="inline-flex items-center gap-2 text-[13px] text-white/95"
+              >
                 <input
+                  id="remember"
                   type="checkbox"
                   className="h-4 w-4 rounded border-white/60 bg-white/90 accent-lime-600"
                   checked={remember}
@@ -167,6 +186,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
+              aria-busy={loading}
               className="mx-auto block h-12 w-44 rounded-full bg-white text-base font-semibold text-gray-700 shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-80"
             >
               {loading ? "Entrando..." : "Login"}

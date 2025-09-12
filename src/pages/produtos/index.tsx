@@ -8,7 +8,7 @@ import { useFavorites } from "@/store/useFavorites";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import { useProducts } from "@/hooks/useProducts";
-import { getToken, clearToken } from "@/utils/authStorage";
+import { getToken } from "@/utils/authStorage";
 
 const ProductModal = dynamic(() => import("@/components/ProductModal"), {
   ssr: false,
@@ -71,7 +71,7 @@ function ProductsContent() {
     loadingMoreRef.current = false;
   }, [debouncedSearch, order, onlyFav]);
 
-  // favoritos
+  // favoritos (usa o hook para manter reatividade)
   const { favorites, toggle, isFavorito } = useFavorites();
 
   // modal
@@ -134,30 +134,45 @@ function ProductsContent() {
       </Head>
       <Navbar />
 
-      <main className="min-h-screen bg-gray-50 dark:bg-zinc-900 p-6">
+      <main
+        className="min-h-screen bg-gray-50 dark:bg-zinc-900 p-6"
+        role="main"
+      >
+        <h1 className="sr-only">Catálogo de Produtos</h1>
+
         {/* Header com filtros */}
-        <header className="mx-auto mb-4 flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex-1">
+        <header
+          className="mx-auto mb-4 flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+          role="search"
+          aria-label="Filtros de busca e ordenação"
+        >
+          <label htmlFor="search" className="flex-1">
+            <span className="sr-only">Buscar por nome ou código</span>
             <input
+              id="search"
               value={search}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome ou código..."
               className="w-full rounded-lg border bg-white dark:bg-zinc-800 dark:border-zinc-700
-           dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-400
-           p-2 text-black outline-none focus:ring-2 focus:ring-blue-500"
+                         dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-400
+                         p-2 text-black outline-none focus:ring-2 focus:ring-blue-500"
               disabled={onlyFav}
+              aria-disabled={onlyFav || undefined}
             />
-          </div>
+          </label>
 
           <div className="flex items-center gap-2">
-            <div className="relative inline-block w-48">
+            <label className="relative inline-block w-48">
+              <span className="sr-only" id="order-label">
+                Ordenar
+              </span>
               <select
+                aria-labelledby="order-label"
                 value={order}
                 onChange={(e) => setOrder(e.target.value as any)}
                 className="w-full appearance-none rounded-[2px] border border-gray-300 dark:border-zinc-700
-           bg-white dark:bg-zinc-800 px-4 py-2 pr-10 text-sm text-gray-700 dark:text-zinc-100
-           shadow-sm outline-none focus:border-[#80BC04] focus:ring-2 focus:ring-[#80BC04]/40"
-                aria-label="Ordenar"
+                           bg-white dark:bg-zinc-800 px-4 py-2 pr-10 text-sm text-gray-700 dark:text-zinc-100
+                           shadow-sm outline-none focus:border-[#80BC04] focus:ring-2 focus:ring-[#80BC04]/40"
               >
                 <option value="">Ordenar por</option>
                 <option value="nome-asc">Nome (A → Z)</option>
@@ -165,7 +180,10 @@ function ProductsContent() {
                 <option value="preco-asc">Preço (low → high)</option>
                 <option value="preco-desc">Preço (high → low)</option>
               </select>
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+              <span
+                className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400"
+                aria-hidden="true"
+              >
                 <svg
                   className="h-4 w-4"
                   xmlns="http://www.w3.org/2000/svg"
@@ -181,19 +199,22 @@ function ProductsContent() {
                   />
                 </svg>
               </span>
-            </div>
+            </label>
 
             <button
               onClick={() => setOnlyFav((v) => !v)}
               aria-pressed={onlyFav}
-              title="Show only favorites"
+              aria-label="Alternar apenas favoritos"
               className={`inline-flex items-center gap-2 rounded-[2px] border px-2 py-1 text-sm font-medium shadow-sm transition ${
                 onlyFav
                   ? "bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
+              type="button"
             >
-              <span className="text-lg">{onlyFav ? "★" : "☆"}</span>
+              <span className="text-lg" aria-hidden="true">
+                {onlyFav ? "★" : "☆"}
+              </span>
               Favoritos
             </button>
           </div>
@@ -201,7 +222,11 @@ function ProductsContent() {
 
         {/* Erro */}
         {error && (
-          <div className="mx-auto mb-4 max-w-6xl rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div
+            className="mx-auto mb-4 max-w-6xl rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            role="alert"
+            aria-live="assertive"
+          >
             Não foi possível carregar os produtos.{" "}
             <button onClick={() => refetch()} className="underline">
               Tentar novamente
@@ -210,30 +235,47 @@ function ProductsContent() {
         )}
 
         {isLoading ? (
-          <section className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <section
+            className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
+            role="status"
+            aria-live="polite"
+          >
             {Array.from({ length: BATCH_SIZE }).map((_, i) => (
-              <div key={i} className="rounded-lg border bg-white p-4 shadow">
-                <div className="h-40 w-full animate-pulse rounded bg-gray-200" />
-                <div className="mt-3 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-                <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
-                <div className="mt-3 h-8 w-full animate-pulse rounded bg-gray-200" />
+              <div
+                key={i}
+                className="rounded-lg border bg-white dark:bg-zinc-800 p-4 shadow"
+              >
+                <div className="h-40 w-full animate-pulse rounded bg-gray-200 dark:bg-zinc-700" />
+                <div className="mt-3 h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-zinc-700" />
+                <div className="mt-2 h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-zinc-700" />
+                <div className="mt-3 h-8 w-full animate-pulse rounded bg-gray-200 dark:bg-zinc-700" />
               </div>
             ))}
+            <span className="sr-only">Carregando produtos…</span>
           </section>
         ) : visible.length === 0 ? (
-          <p className="mx-auto max-w-6xl text-gray-500">
+          <p
+            className="mx-auto max-w-6xl text-gray-500 dark:text-zinc-300"
+            role="status"
+            aria-live="polite"
+          >
             Nenhum produto encontrado.
           </p>
         ) : (
           <>
-            <section className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            <section
+              className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+              role="list"
+              aria-label="Lista de produtos"
+            >
               {visible.map((p, i) => (
                 <article
                   key={`${p.codigo || "item"}-${i}`}
                   className="relative"
+                  role="listitem"
                 >
                   <header className="mb-2 text-center">
-                    <h2 className="text-[17px] font-semibold leading-tight text-black truncate dark:text-zinc-100">
+                    <h2 className="text-[17px] font-semibold leading-tight text-black dark:text-zinc-100 truncate">
                       {p.nome
                         ? p.nome.charAt(0).toUpperCase() +
                           p.nome.slice(1).toLowerCase()
@@ -246,11 +288,11 @@ function ProductsContent() {
 
                   <div
                     className="relative rounded-[2px] border border-gray-200 dark:border-zinc-700
-           bg-white dark:bg-zinc-800 p-3 shadow-sm"
+                               bg-white dark:bg-zinc-800 p-3 shadow-sm"
                   >
                     <button
                       onClick={() =>
-                        useFavorites.getState().toggle({
+                        toggle({
                           codigo: p.codigo,
                           nome: p.nome,
                           preco: p.preco,
@@ -260,16 +302,21 @@ function ProductsContent() {
                       }
                       className="absolute left-2 top-2 text-xl leading-none text-gray-600 hover:text-amber-500 dark:text-zinc-100"
                       aria-label={
-                        useFavorites.getState().isFavorito(p.codigo)
-                          ? "Remover dos favorites"
-                          : "Adicionar aos favorites"
+                        isFavorito(p.codigo)
+                          ? "Remover dos favoritos"
+                          : "Adicionar aos favoritos"
                       }
+                      aria-pressed={isFavorito(p.codigo)}
+                      type="button"
                       title="Favoritar"
                     >
-                      {useFavorites.getState().isFavorito(p.codigo) ? "★" : "☆"}
+                      {isFavorito(p.codigo) ? "★" : "☆"}
                     </button>
 
-                    <span className="absolute bg-cyan-500/10 right-2 top-2 text-[12px] font-bold uppercase tracking-wide text-sky-600">
+                    <span
+                      className="absolute bg-cyan-500/10 right-2 top-2 text-[12px] font-bold uppercase tracking-wide text-sky-600"
+                      aria-label="Produto exclusivo"
+                    >
                       EXCLUSIVO!
                     </span>
 
@@ -287,7 +334,7 @@ function ProductsContent() {
                       />
                     </div>
 
-                    <div className="mt-3 inline-flex items-center rounded-r border border-l-0 border-gray-300 bg-white px-2.5 py-1.5">
+                    <div className="mt-3 inline-flex items-center rounded-r border border-l-0 border-gray-300 bg-white px-2.5 py-1.5 dark:bg-zinc-800 dark:border-zinc-700">
                       <Image
                         src="/images/img-box.png"
                         alt="Com embalagem especial"
@@ -296,10 +343,10 @@ function ProductsContent() {
                         className="shrink-0"
                       />
                       <div className="ml-2 leading-tight">
-                        <span className="block text-[12px] font-semibold text-gray-700">
+                        <span className="block text-[12px] font-semibold text-gray-700 dark:text-zinc-200">
                           com embalagem
                         </span>
-                        <span className="block text-[12px] font-bold text-gray-700">
+                        <span className="block text-[12px] font-bold text-gray-700 dark:text-zinc-200">
                           especial
                         </span>
                       </div>
@@ -359,6 +406,9 @@ function ProductsContent() {
                   <button
                     onClick={() => setSelected(p)}
                     className="mt-3 inline-flex h-8 w-full items-center justify-center rounded-[2px] bg-[#7CB800] text-base font-extrabold uppercase tracking-wide leading-none text-white hover:brightness-95"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-controls="product-modal"
                   >
                     CONFIRA
                   </button>
@@ -372,6 +422,7 @@ function ProductsContent() {
                   <div
                     ref={sentinelRef}
                     className="mx-auto flex h-12 max-w-6xl items-center justify-center"
+                    aria-hidden="true"
                   >
                     {loadingMore && (
                       <span className="text-sm text-gray-500">
@@ -382,7 +433,7 @@ function ProductsContent() {
                 ) : (
                   total > 0 && (
                     <div className="mx-auto flex h-10 max-w-6xl items-center justify-center">
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-400 dark:text-zinc-400">
                         Fim da lista
                       </span>
                     </div>
@@ -394,6 +445,8 @@ function ProductsContent() {
                     <button
                       onClick={() => setPage((p) => p + 1)}
                       className="rounded border bg-white px-4 py-2 text-sm shadow hover:bg-gray-50"
+                      type="button"
+                      aria-label="Carregar mais produtos"
                     >
                       Carregar mais
                     </button>
