@@ -19,12 +19,53 @@ NEXT_PUBLIC_API_BASE=https://sua-api.com
 
 Essa variável define a URL base para as chamadas de API.
 
-## 🛠️ Decisões técnicas
+## 🧠 Decisões tomadas
 
-- **Framework**: [Next.js](https://nextjs.org/) escolhido pela simplicidade e suporte a SSR/SSG.  
-- **Estilização**: [TailwindCSS](https://tailwindcss.com/) para agilizar a construção da interface.  
-- **Gerenciamento de estado global**: [Zustand](https://github.com/pmndrs/zustand) para controlar autenticação e favoritos com persistência em storage.  
-- **Autenticação**: controle de sessão via token JWT, armazenado em `localStorage` quando a opção *remember me* está ativa.  
+### Next.js (Pages Router)
+- Simplicidade e rapidez para o escopo do teste.
+- `ProductModal` carregado sob demanda via `next/dynamic` (code-splitting).
+
+### Gerenciamento de estado com Zustand
+- `authUser`: armazena `dados_usuario` **normalizados** (trim de espaços) e **persistidos** em `localStorage`.
+- `useFavorites`: favoritos persistidos com `persist`.
+- **Motivo:** API leve, sem boilerplate, com hidratação automática.
+
+### Autenticação / sessão
+- Token salvo em `localStorage` (quando “manter logado”) ou `sessionStorage`.
+- Token também espelhado em cookie (`auth_token`) para o **middleware**.
+- Middleware protege `/produtos`; sem token → redirect para `/login`.
+
+### HTTP com axios + interceptors
+- Interceptor de **request**: anexa `Authorization: Bearer <token>`.
+- Interceptor de **response**: em **401**, limpa token + usuário e redireciona para `/login`.
+
+### Data fetching com SWR
+- Hook `useProducts`: cache, revalidação e deduplicação.
+- Busca por **nome** ou **código**; normalização (acentos/minúsculas); **debounce** no input.
+- **Motivo:** cenário de leitura simples → **SWR** é mais leve que React Query.
+
+### UI com Tailwind
+- **Mobile-first**, utilitárias reutilizáveis.
+- Dark mode por classe (`darkMode: "class"`), com toggle (`ThemeToggle`) e preferência salva em `localStorage`.
+- Script inline no `_document` aplica a classe `dark` antes da renderização (evita *flash*).
+
+### Acessibilidade (a11y)
+- Labels reais (`<label htmlFor="...">`), `aria-label` / `aria-labelledby` quando necessário.
+- Landmarks: `role="search"`, `role="main"`, `role="list"` / `role="listitem"`.
+- Estados anunciáveis: `role="status"` / `role="alert"` com `aria-live`.
+- Modal com Headless UI; botões com `aria-pressed`, `aria-haspopup`.
+- Imagens com `alt` significativo.
+
+### Performance / UX
+- `IntersectionObserver` para **infinite scroll**.
+- `useMemo` em ordenação/filtragem.
+- `loading="lazy"` nas imagens + **placeholder** em erro.
+
+### Testes
+- **Vitest + React Testing Library** (JSDOM).
+- Mocks de `next/image`, `next/link` e `next/router`.
+- Testes de UI mínimos: `Navbar` (integra com store) e `ProductModal` (render/fechar).
+
 
 
 # Checklist — Status
@@ -49,22 +90,26 @@ Essa variável define a URL base para as chamadas de API.
 
 ## Técnicos
 - ✅ **Next.js (pages)** + **TypeScript** + **Tailwind** + **Zustand**
-- ⚠️ **SWR ou React Query**: ainda não (estamos em fetch/estado manual)
-- ⚠️ **Interceptor global** adicionando `Authorization: Bearer <token>`: hoje o `401` é tratado no componente; vale mover para interceptor
+- ✅ **SWR** para cache/revalidação (hook `useProducts`)
+- ✅ **Interceptor global (axios)**: anexa `Authorization: Bearer <token>` e, em **401**, limpa sessão e redireciona
 - ✅ **Responsividade mobile-first**
-- ⚠️ **Acessibilidade**: está boa, mas revisar `labels/aria` do login e **focus trap** no modal para cravar 100
-- ✅ **SEO**: `<title>` e `<meta description>` em `/produtos` (conferir também em `/login`)
-- ⚠️ **Lighthouse ≥ 90**: precisa rodar e anexar screenshot
+- ✅ **Acessibilidade**: labels/`aria-*` no login e produtos, landmarks (`role="main"`, `role="search"`, `role="list"`), `role="alert"/"status"`; modal Headless UI com foco gerenciado
+- ✅ **SEO**: `<title>` e `<meta name="description">` em `/login` e `/produtos`
+- ✅ Tratamento de estados refinado (ex.: placeholder de imagem, retry/backoff).
+- ⏳ **Lighthouse ≥ 90 (Desktop)**: **rodar e anexar** screenshot no README (`docs/lighthouse.png`)
+- ⏳1 smoke E2E (Playwright) que valide fluxo: login → ver grid
 
 ---
 
 ## Diferenciais (opcionais)
-- ✅ **Rota protegida** (redirect automático na ausência de token)
-- ⚠️ **Dark mode** (toggle)
-- ✅ **Code-splitting** do modal (já temos)
-- ⚠️ **Testes** (unitário + smoke E2E)
-- ⚠️ Placeholders/retry/backoff extras
-- ⚠️ Pequeno **design-system** (Button/Card/Input)
+- ✅ **Rota protegida** (middleware + guard)
+- ✅ **Dark mode** (toggle com preferência salva e sem *flash*)
+- ✅ **Code-splitting** do modal (`next/dynamic`)
+- ✅ **Testes unitários** (Vitest + React Testing Library): `Navbar` e `ProductModal`
+- ✅ **Tratamento de estados**: skeleton, erro com “Tentar novamente”, **placeholder** de imagem
+- ✅ **Retry/backoff global (SWRConfig)**: `errorRetryCount=2`, `errorRetryInterval=1500ms`, `revalidateOnFocus=false`, `dedupingInterval=10000`  
+  _(ver `src/pages/_app.tsx`)_
+- ⏳ **Design-system simples** (Button/Card/Input) 
 
 ---
 
