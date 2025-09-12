@@ -3,12 +3,18 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import api from "@/lib/api";
 import { setToken } from "@/utils/authStorage";
+import { useAuthUser } from "@/store/authUser"; // ⬅️ novo
 
 type LoginResponse = {
   status: number; // 1 ok, 0 erro
   message: string;
   token_de_acesso?: string;
-  dados_usuario?: unknown;
+  dados_usuario?: {
+    codigo_usuario: string;
+    nome_usuario: string;
+    codigo_grupo: string;
+    nome_grupo: string;
+  };
 };
 
 export default function LoginPage() {
@@ -18,6 +24,9 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formErr, setFormErr] = useState("");
+  
+  // pega setter do store
+  const setUser = useAuthUser((s) => s.setUser);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,14 +37,22 @@ export default function LoginPage() {
         "/api/innova-dinamica/login/acessar",
         { email, senha: password }
       );
-      console.log("data", data);
+
       if (data.status === 1 && data.token_de_acesso) {
+        // token
         setToken(data.token_de_acesso, remember);
+        // cookie opcional p/ middleware
+        if (typeof document !== "undefined") {
+          document.cookie = `auth_token=${data.token_de_acesso}; path=/; SameSite=Lax`;
+        }
+        // guarda usuário no Zustand (normalizado)
+        setUser(data.dados_usuario ?? null);
+
         router.push("/produtos");
       } else {
         setFormErr(data.message || "Email ou password inválidos.");
       }
-    } catch (err) {
+    } catch {
       setFormErr("Não foi possível conectar. Tente novamente.");
     } finally {
       setLoading(false);
@@ -161,5 +178,4 @@ export default function LoginPage() {
       </main>
     </>
   );
-
 }

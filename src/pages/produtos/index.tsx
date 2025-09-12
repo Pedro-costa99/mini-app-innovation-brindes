@@ -2,13 +2,13 @@ import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import api from "@/lib/api";
-import { getToken, clearToken } from "@/utils/authStorage";
 import useDebounce from "@/hooks/useDebounce";
 import useIntersection from "@/hooks/useIntersection";
 import { useFavorites } from "@/store/useFavorites";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
+import { useProducts } from "@/hooks/useProducts";
+import { getToken, clearToken } from "@/utils/authStorage";
 
 const ProductModal = dynamic(() => import("@/components/ProductModal"), {
   ssr: false,
@@ -24,15 +24,6 @@ type Product = {
 };
 
 const BATCH_SIZE = 12;
-
-function toArray<T = any>(raw: any): T[] {
-  if (Array.isArray(raw)) return raw as T[];
-  if (Array.isArray(raw?.data)) return raw.data as T[];
-  if (Array.isArray(raw?.items)) return raw.items as T[];
-  if (Array.isArray(raw?.resultado)) return raw.resultado as T[];
-  if (raw && typeof raw === "object") return [raw as T];
-  return [];
-}
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -51,7 +42,6 @@ export default function ProductsPage() {
 }
 
 function ProductsContent() {
-  const router = useRouter();
   const [search, setBusca] = useState("");
   const debouncedSearch = useDebounce(search, 400);
   const [order, setOrder] = useState<
@@ -59,11 +49,10 @@ function ProductsContent() {
   >("");
   const [onlyFav, setOnlyFav] = useState(false);
 
-  // dados
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [reloadTick, setReloadTick] = useState(0);
+  // SWR (cache/revalidação)
+  const { products, isLoading, error, refetch } = useProducts({
+    queryText: debouncedSearch,
+  });
 
   // infinite scroll
   const [page, setPage] = useState(1);
@@ -75,81 +64,29 @@ function ProductsContent() {
   });
   const loadingMoreRef = useRef(false);
 
-  // favorites
+  // reset ao trocar fonte/ordenacao/filtro
+  useEffect(() => {
+    setPage(1);
+    setLoadingMore(false);
+    loadingMoreRef.current = false;
+  }, [debouncedSearch, order, onlyFav]);
+
+  // favoritos
   const { favorites, toggle, isFavorito } = useFavorites();
 
   // modal
   const [selected, setSelected] = useState<Product | null>(null);
 
-  // ===== BUSCA (carga inicial + search) =====
-  useEffect(() => {
-    function normalizeSearch(text: string): string {
-      return text
-        .normalize("NFD") // separa acentos
-        .replace(/[\u0300-\u036f]/g, "") // remove marcas de acento
-        .replace(/\s+/g, " ") // reduz múltiplos espaços
-        .trim()
-        .toLowerCase(); // força minúsculo
-    }
-
-    const queryText = normalizeSearch(debouncedSearch);
-    const controller = new AbortController();
-
-    async function run() {
-      setError("");
-      setLoading(true);
-      try {
-        const url = "/api/innova-dinamica/produtos/listar";
-        const isCode = (s: string) =>
-          /^\d+$/.test(s) || (/\d/.test(s) && !/\s/.test(s));
-
-        const request = queryText
-          ? api.post(
-              url,
-              isCode(queryText)
-                ? { codigo_produto: queryText }
-                : { nome_produto: queryText },
-              { signal: controller.signal }
-            )
-          : api.get(url, { signal: controller.signal });
-
-        const { data } = await request;
-        if (controller.signal.aborted) return;
-
-        setProducts(toArray<Product>(data));
-        setPage(1); // reseta paginação ao trocar a fonte de dados
-        setLoadingMore(false);
-        loadingMoreRef.current = false;
-      } catch (e: any) {
-        if (e?.code === "ERR_CANCELED") return;
-        if (e?.response?.status === 401) {
-          clearToken();
-          router.replace("/login");
-          return;
-        }
-        setError("Não foi possível carregar os products. Tente novamente.");
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    }
-
-    run();
-    return () => controller.abort();
-    // reloadTick permite "Tentar novamente"
-  }, [debouncedSearch, reloadTick, router]);
-
-  // ===== BASE LIST (favoritos) =====
+  // base list (opcionalmente só favoritos)
   const baseList: Product[] = useMemo(() => {
-    const productsSaved = Array.isArray(products) ? products : [];
-    if (!onlyFav) return productsSaved;
-    const favSafe = Array.isArray(favorites) ? favorites : [];
-    const favMap = new Map(favSafe.map((f) => [f.codigo, true]));
-    return productsSaved.filter((p) => favMap.has(p.codigo));
+    if (!onlyFav) return products;
+    const favMap = new Map(favorites.map((f) => [f.codigo, true]));
+    return products.filter((p) => favMap.has(p.codigo));
   }, [products, onlyFav, favorites]);
 
-  // ===== ORDENAÇÃO =====
+  // ordenação local
   const productsOrdered = useMemo<Product[]>(() => {
-    const arr = [...(Array.isArray(baseList) ? baseList : [])];
+    const arr = [...baseList];
     switch (order) {
       case "nome-asc":
         return arr.sort((a, b) =>
@@ -168,33 +105,23 @@ function ProductsContent() {
     }
   }, [baseList, order]);
 
-  // ===== PAGINAÇÃO CLIENT =====
+  // paginação no cliente
   const total = productsOrdered.length;
   const maxPages = Math.max(1, Math.ceil(total / BATCH_SIZE));
   const safePage = Math.min(page, maxPages);
   const visible = productsOrdered.slice(0, safePage * BATCH_SIZE);
   const hasMore = !onlyFav && safePage < maxPages;
 
-  // reset página ao mudar ordenação/fav
+  // carregar mais via sentinela
   useEffect(() => {
-    setPage(1);
-    setLoadingMore(false);
-    loadingMoreRef.current = false;
-  }, [order, onlyFav]);
-
-  // ===== INFINITE SCROLL OBSERVER =====
-  useEffect(() => {
-    if (!isIntersecting) return;
-    if (!hasMore) return;
-    if (loading) return;
-    if (loadingMoreRef.current) return;
+    if (!isIntersecting || !hasMore || isLoading || loadingMoreRef.current)
+      return;
     loadingMoreRef.current = true;
     setLoadingMore(true);
     setPage((p) => p + 1);
-
     setLoadingMore(false);
     loadingMoreRef.current = false;
-  }, [isIntersecting, hasMore, loading]);
+  }, [isIntersecting, hasMore, isLoading]);
 
   return (
     <>
@@ -234,8 +161,6 @@ function ProductsContent() {
                 <option value="preco-asc">Preço (low → high)</option>
                 <option value="preco-desc">Preço (high → low)</option>
               </select>
-
-              {/* seta custom */}
               <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
                 <svg
                   className="h-4 w-4"
@@ -267,23 +192,27 @@ function ProductsContent() {
               <span className="text-lg">{onlyFav ? "★" : "☆"}</span>
               Favoritos
             </button>
+
+            <button
+              onClick={() => refetch()}
+              className="inline-flex rounded-[2px] border px-3 py-1.5 text-sm shadow-sm bg-white hover:bg-gray-50"
+            >
+              Tentar novamente
+            </button>
           </div>
         </header>
 
         {/* Erro */}
         {error && (
           <div className="mx-auto mb-4 max-w-6xl rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}{" "}
-            <button
-              onClick={() => setReloadTick((n) => n + 1)}
-              className="underline"
-            >
+            Não foi possível carregar os produtos.{" "}
+            <button onClick={() => refetch()} className="underline">
               Tentar novamente
             </button>
           </div>
         )}
 
-        {loading ? (
+        {isLoading ? (
           <section className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {Array.from({ length: BATCH_SIZE }).map((_, i) => (
               <div key={i} className="rounded-lg border bg-white p-4 shadow">
@@ -320,21 +249,32 @@ function ProductsContent() {
 
                   <div className="relative rounded-[2px] border border-gray-200 bg-white p-3 shadow-sm">
                     <button
-                      onClick={() => toggle(p)}
+                      onClick={() =>
+                        useFavorites.getState().toggle({
+                          codigo: p.codigo,
+                          nome: p.nome,
+                          preco: p.preco,
+                          imagem: p.imagem,
+                          descricao: p.descricao,
+                        })
+                      }
                       className="absolute left-2 top-2 text-xl leading-none text-gray-600 hover:text-amber-500"
                       aria-label={
-                        isFavorito(p.codigo)
+                        useFavorites.getState().isFavorito(p.codigo)
                           ? "Remover dos favorites"
                           : "Adicionar aos favorites"
                       }
                       title="Favoritar"
                     >
-                      {isFavorito(p.codigo) ? "★" : "☆"}
+                      {useFavorites.getState().isFavorito(p.codigo) ? "★" : "☆"}
                     </button>
+
                     <span className="absolute bg-cyan-500/10 right-2 top-2 text-[12px] font-bold uppercase tracking-wide text-sky-600">
                       EXCLUSIVO!
                     </span>
+
                     <div className="mt-5">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={p.imagem}
                         alt={p.nome}
@@ -342,6 +282,7 @@ function ProductsContent() {
                         loading="lazy"
                       />
                     </div>
+
                     <div className="mt-3 inline-flex items-center rounded-r border border-l-0 border-gray-300 bg-white px-2.5 py-1.5">
                       <Image
                         src="/images/img-box.png"
@@ -359,6 +300,7 @@ function ProductsContent() {
                         </span>
                       </div>
                     </div>
+
                     <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-700">
                       {p.descricao ||
                         "Caneta plástica com funções esferográfica e marca texto, com..."}

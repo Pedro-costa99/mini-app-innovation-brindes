@@ -1,10 +1,9 @@
-// src/components/Navbar.tsx
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { clearToken } from "@/utils/authStorage";
-import userAvatar from "@/public/images/user.png";
+import { useAuthUser } from "@/store/authUser";
 
 type NavbarProps = {
   userName?: string;
@@ -38,7 +37,7 @@ function formatTodayPtBR() {
 }
 
 export default function Navbar({
-  userName = "Ana Carol Machado",
+  userName,
   userSubtext,
   avatarSrc = "",
   showIcons = true,
@@ -48,6 +47,11 @@ export default function Navbar({
   showLogout = true,
 }: NavbarProps) {
   const router = useRouter();
+  const authUser = useAuthUser((s) => s.user);
+  const clearUser = useAuthUser((s) => s.clearUser);
+
+  const displayName = authUser?.nome_usuario?.trim() || userName || "Usuário";
+
   const computedSubtext = useMemo(
     () => userSubtext ?? formatTodayPtBR(),
     [userSubtext]
@@ -55,6 +59,7 @@ export default function Navbar({
 
   function handleLogout() {
     clearToken();
+    clearUser();
     router.replace("/login");
   }
 
@@ -120,8 +125,8 @@ export default function Navbar({
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 overflow-hidden rounded-full">
                 <Image
-                  src="/images/user.png"
-                  alt={userName}
+                  src={avatarSrc || "/images/user.png"}
+                  alt={displayName}
                   width={66}
                   height={66}
                   className="h-full w-full object-cover"
@@ -129,7 +134,7 @@ export default function Navbar({
               </div>
               <div className="hidden text-right text-white sm:block">
                 <div className="text-[13px] font-semibold leading-4">
-                  {userName}
+                  {displayName}
                 </div>
                 <div className="text-[11px] -mt-0.5 opacity-90">
                   {computedSubtext}
