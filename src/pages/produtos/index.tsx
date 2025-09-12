@@ -192,13 +192,6 @@ function ProductsContent() {
               <span className="text-lg">{onlyFav ? "★" : "☆"}</span>
               Favoritos
             </button>
-
-            <button
-              onClick={() => refetch()}
-              className="inline-flex rounded-[2px] border px-3 py-1.5 text-sm shadow-sm bg-white hover:bg-gray-50"
-            >
-              Tentar novamente
-            </button>
           </div>
         </header>
 
