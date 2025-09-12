@@ -64,9 +64,9 @@ export default function LoginPage() {
       </Head>
 
       <main
-        className="relative min-h-screen flex flex-col items-center justify-center"
+        className="relative min-h-screen flex flex-col items-center justify-center bg-app"
         style={{
-          backgroundImage: "url(/images/bg-app.png)",
+          backgroundImage: "url(/images/bg-app.webp)",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

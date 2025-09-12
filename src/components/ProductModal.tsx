@@ -1,6 +1,7 @@
 "use client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useEffect, useState } from "react";
+import NextImage from "next/image";
 
 type Product = {
   codigo: string;
@@ -34,7 +35,7 @@ export default function ProductModal({
               : ""}
           </DialogTitle>
 
-          <img
+          <NextImage
             src={product.imagem}
             alt={product.nome}
             className="mt-3 h-60 w-full rounded object-cover"

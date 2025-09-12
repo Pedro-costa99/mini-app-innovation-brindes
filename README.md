@@ -45,11 +45,13 @@ Essa variável define a URL base para as chamadas de API.
 - **Motivo:** cenário de leitura simples → **SWR** é mais leve que React Query.
 
 ### UI com Tailwind
+
 - **Mobile-first**, utilitárias reutilizáveis.
 - Dark mode por classe (`darkMode: "class"`), com toggle (`ThemeToggle`) e preferência salva em `localStorage`.
-- Script inline no `_document` aplica a classe `dark` antes da renderização (evita *flash*).
+- Script inline no `_document` aplica a classe `dark` antes da renderização (evita _flash_).
 
 ### Acessibilidade (a11y)
+
 - Labels reais (`<label htmlFor="...">`), `aria-label` / `aria-labelledby` quando necessário.
 - Landmarks: `role="search"`, `role="main"`, `role="list"` / `role="listitem"`.
 - Estados anunciáveis: `role="status"` / `role="alert"` com `aria-live`.
@@ -57,20 +59,21 @@ Essa variável define a URL base para as chamadas de API.
 - Imagens com `alt` significativo.
 
 ### Performance / UX
+
 - `IntersectionObserver` para **infinite scroll**.
 - `useMemo` em ordenação/filtragem.
 - `loading="lazy"` nas imagens + **placeholder** em erro.
 
 ### Testes
+
 - **Vitest + React Testing Library** (JSDOM).
 - Mocks de `next/image`, `next/link` e `next/router`.
 - Testes de UI mínimos: `Navbar` (integra com store) e `ProductModal` (render/fechar).
 
-
-
 # Checklist — Status
 
 ## Funcionais
+
 - ✅ **/login** com e-mail, senha, “manter logado”, link “esqueceu a senha?”
 - ✅ Chama **POST /login/acessar**, salva token e redireciona
 - ✅ Bloqueio de **/produtos** sem token (redirect)
@@ -89,6 +92,7 @@ Essa variável define a URL base para as chamadas de API.
 ---
 
 ## Técnicos
+
 - ✅ **Next.js (pages)** + **TypeScript** + **Tailwind** + **Zustand**
 - ✅ **SWR** para cache/revalidação (hook `useProducts`)
 - ✅ **Interceptor global (axios)**: anexa `Authorization: Bearer <token>` e, em **401**, limpa sessão e redireciona
@@ -96,20 +100,20 @@ Essa variável define a URL base para as chamadas de API.
 - ✅ **Acessibilidade**: labels/`aria-*` no login e produtos, landmarks (`role="main"`, `role="search"`, `role="list"`), `role="alert"/"status"`; modal Headless UI com foco gerenciado
 - ✅ **SEO**: `<title>` e `<meta name="description">` em `/login` e `/produtos`
 - ✅ Tratamento de estados refinado (ex.: placeholder de imagem, retry/backoff).
-- ⏳ **Lighthouse ≥ 90 (Desktop)**: **rodar e anexar** screenshot no README (`docs/lighthouse.png`)
+- ⏳ **Lighthouse ≥ 90 (Desktop)**: **rodar e anexar** screenshot no README (`images/lighthouse.webp`)
 - ⏳1 smoke E2E (Playwright) que valide fluxo: login → ver grid
 
 ---
 
 ## Diferenciais (opcionais)
 - ✅ **Rota protegida** (middleware + guard)
-- ✅ **Dark mode** (toggle com preferência salva e sem *flash*)
+- ✅ **Dark mode** (toggle com preferência salva e sem _flash_)
 - ✅ **Code-splitting** do modal (`next/dynamic`)
 - ✅ **Testes unitários** (Vitest + React Testing Library): `Navbar` e `ProductModal`
 - ✅ **Tratamento de estados**: skeleton, erro com “Tentar novamente”, **placeholder** de imagem
 - ✅ **Retry/backoff global (SWRConfig)**: `errorRetryCount=2`, `errorRetryInterval=1500ms`, `revalidateOnFocus=false`, `dedupingInterval=10000`  
   _(ver `src/pages/_app.tsx`)_
-- ⏳ **Design-system simples** (Button/Card/Input) 
+- ⏳ **Design-system simples** (Button/Card/Input)
 
 ---
 
@@ -117,18 +121,18 @@ Essa variável define a URL base para as chamadas de API.
 - ✅ Repositório público
 - ⚠️ **README**: screenshot Lighthouse e GIF do fluxo
 
-
 ## 🌐 Deploy
 
 O projeto foi implantado na **Vercel** e pode ser acessado nos links (necessário autenticação):
 
-- [Página inicial](https://mini-app-innovation-brindes.vercel.app/)  
-- [Login](https://mini-app-innovation-brindes.vercel.app/login)  
+- [Página inicial](https://mini-app-innovation-brindes.vercel.app/)
+- [Login](https://mini-app-innovation-brindes.vercel.app/login)
 - [Produtos](https://mini-app-innovation-brindes.vercel.app/produtos)
 
-
 # App - Tela de Login Desktop
-![Tela de Login Desktop](public/images/screen_login.png)
+
+![Tela de Login Desktop](public/images/screen_login.webp)
 
 # App - Tela de produtos Desktop
-![Tela de produtos Desktop](public/images/img-desktop.png)
+
+![Tela de produtos Desktop](public/images/img-desktop.webp)

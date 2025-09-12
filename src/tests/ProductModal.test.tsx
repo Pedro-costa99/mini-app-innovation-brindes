@@ -7,7 +7,7 @@ const product = {
   codigo: "123",
   nome: "CANETA XYZ",
   referencia: "REF-9",
-  imagem: "/images/placeholder.png",
+  imagem: "/images/placeholder.webp",
   preco: "12.34",
   descricao: "Uma caneta legal",
 };

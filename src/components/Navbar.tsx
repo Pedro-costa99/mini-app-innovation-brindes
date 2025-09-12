@@ -72,7 +72,7 @@ export default function Navbar({
           <div className="flex items-center gap-3">
             <Link href={logoHref} aria-label="Ir para a página inicial">
               <Image
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="Innovation Brindes"
                 width={100}
                 height={100}
@@ -127,7 +127,7 @@ export default function Navbar({
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 overflow-hidden rounded-full">
                 <Image
-                  src={avatarSrc || "/images/user.png"}
+                  src={avatarSrc || "/images/user.webp"}
                   alt={displayName}
                   width={66}
                   height={66}
