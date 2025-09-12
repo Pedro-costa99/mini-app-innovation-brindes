@@ -134,7 +134,7 @@ function ProductsContent() {
       </Head>
       <Navbar />
 
-      <main className="min-h-screen bg-gray-50 p-6">
+      <main className="min-h-screen bg-gray-50 dark:bg-zinc-900 p-6">
         {/* Header com filtros */}
         <header className="mx-auto mb-4 flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1">
@@ -142,7 +142,9 @@ function ProductsContent() {
               value={search}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome ou código..."
-              className="w-full rounded-lg border bg-white p-2 text-black placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border bg-white dark:bg-zinc-800 dark:border-zinc-700
+           dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-400
+           p-2 text-black outline-none focus:ring-2 focus:ring-blue-500"
               disabled={onlyFav}
             />
           </div>
@@ -152,7 +154,9 @@ function ProductsContent() {
               <select
                 value={order}
                 onChange={(e) => setOrder(e.target.value as any)}
-                className="w-full appearance-none rounded-[2px] border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 shadow-sm outline-none focus:border-[#80BC04] focus:ring-2 focus:ring-[#80BC04]/40"
+                className="w-full appearance-none rounded-[2px] border border-gray-300 dark:border-zinc-700
+           bg-white dark:bg-zinc-800 px-4 py-2 pr-10 text-sm text-gray-700 dark:text-zinc-100
+           shadow-sm outline-none focus:border-[#80BC04] focus:ring-2 focus:ring-[#80BC04]/40"
                 aria-label="Ordenar"
               >
                 <option value="">Ordenar por</option>
@@ -229,18 +233,21 @@ function ProductsContent() {
                   className="relative"
                 >
                   <header className="mb-2 text-center">
-                    <h2 className="text-[17px] font-semibold leading-tight text-black truncate">
+                    <h2 className="text-[17px] font-semibold leading-tight text-black truncate dark:text-zinc-100">
                       {p.nome
                         ? p.nome.charAt(0).toUpperCase() +
                           p.nome.slice(1).toLowerCase()
                         : ""}
                     </h2>
-                    <p className="-mt-0.5 text-[13px] font-normal text-gray-700">
+                    <p className="-mt-0.5 text-[13px] font-normal text-gray-700 dark:text-zinc-300">
                       {p.codigo}
                     </p>
                   </header>
 
-                  <div className="relative rounded-[2px] border border-gray-200 bg-white p-3 shadow-sm">
+                  <div
+                    className="relative rounded-[2px] border border-gray-200 dark:border-zinc-700
+           bg-white dark:bg-zinc-800 p-3 shadow-sm"
+                  >
                     <button
                       onClick={() =>
                         useFavorites.getState().toggle({
@@ -251,7 +258,7 @@ function ProductsContent() {
                           descricao: p.descricao,
                         })
                       }
-                      className="absolute left-2 top-2 text-xl leading-none text-gray-600 hover:text-amber-500"
+                      className="absolute left-2 top-2 text-xl leading-none text-gray-600 hover:text-amber-500 dark:text-zinc-100"
                       aria-label={
                         useFavorites.getState().isFavorito(p.codigo)
                           ? "Remover dos favorites"
@@ -273,6 +280,10 @@ function ProductsContent() {
                         alt={p.nome}
                         className="mx-auto h-44 w-full rounded object-contain"
                         loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src =
+                            "/images/placeholder.png";
+                        }}
                       />
                     </div>
 
@@ -294,12 +305,12 @@ function ProductsContent() {
                       </div>
                     </div>
 
-                    <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-700">
+                    <p className="mt-2 line-clamp-2 text-[13px] leading-snug text-gray-700 dark:text-zinc-300">
                       {p.descricao ||
                         "Caneta plástica com funções esferográfica e marca texto, com..."}
                     </p>
                     <div className="mt-3">
-                      <p className="text-[12px] font-semibold text-gray-700">
+                      <p className="text-[12px] font-semibold text-gray-700 dark:text-zinc-100">
                         Cores:
                       </p>
                       <div className="mt-1 inline-grid grid-cols-6 gap-x-2 gap-y-2">
@@ -329,14 +340,16 @@ function ProductsContent() {
                     </div>
                     <div className="mt-3 flex justify-end text-right">
                       <div>
-                        <p className="text-[12px] text-gray-500">a partir de</p>
-                        <p className="leading-[1.1] text-2xl font-extrabold text-gray-900">
+                        <p className="text-[12px] text-gray-500 dark:text-zinc-400">
+                          a partir de
+                        </p>
+                        <p className="leading-[1.1] text-2xl font-extrabold text-gray-900 dark:text-zinc-100">
                           {Intl.NumberFormat("pt-BR", {
                             style: "currency",
                             currency: "BRL",
                           }).format(Number(p.preco))}
                         </p>
-                        <p className="text-[10px] text-gray-400 -mt-0.5">
+                        <p className="text-[10px] text-gray-400 dark:text-zinc-400 -mt-0.5">
                           gerado pela melhor oferta
                         </p>
                       </div>

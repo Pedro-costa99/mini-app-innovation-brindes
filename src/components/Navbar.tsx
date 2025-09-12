@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { clearToken } from "@/utils/authStorage";
@@ -141,6 +142,11 @@ export default function Navbar({
                 </div>
               </div>
             </div>
+            {showIcons && (
+              <div className="flex items-center gap-4 text-white">
+                <ThemeToggle />
+              </div>
+            )}
             {showLogout && (
               <button
                 onClick={handleLogout}
