@@ -336,7 +336,7 @@ function ProductsContent() {
 
                     <div className="mt-3 inline-flex items-center rounded-r border border-l-0 border-gray-300 bg-white px-2.5 py-1.5 dark:bg-zinc-800 dark:border-zinc-700">
                       <Image
-                        src="/images/img-box.png"
+                        src="/images/img-box.webp"
                         alt="Com embalagem especial"
                         width={50}
                         height={50}
