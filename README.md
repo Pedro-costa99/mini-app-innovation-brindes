@@ -128,11 +128,25 @@ O projeto foi implantado na **Vercel** e pode ser acessado nos links (necessári
 - [Página inicial](https://mini-app-innovation-brindes.vercel.app/)
 - [Login](https://mini-app-innovation-brindes.vercel.app/login)
 - [Produtos](https://mini-app-innovation-brindes.vercel.app/produtos)
+# App - Diagnóstico Lighthouse
+
+![Diagnóstico Lighthouse](public/images/lighthouse.webp)
 
 # App - Tela de Login Desktop
 
 ![Tela de Login Desktop](public/images/screen_login.webp)
 
+
 # App - Tela de produtos Desktop
 
 ![Tela de produtos Desktop](public/images/img-desktop.webp)
+
+# App - Tela de produtos mobile
+
+![Tela de produtos Desktop](public/images/img-mobile.webp)
+
+# App - Theme escuro do app
+
+![Tela de produtos Desktop](public/images/theme_dark.webp)
+
+
