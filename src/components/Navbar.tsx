@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { clearToken } from "@/utils/authStorage";
 import { useAuthUser } from "@/store/authUser";
@@ -74,23 +73,21 @@ export default function Navbar({
               <Image
                 src="/images/logo.webp"
                 alt="Innovation Brindes"
-                width={100}
-                height={100}
+                width={120}
+                height={120}
                 priority
                 className="filter brightness-0 invert"
               />
             </Link>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2 sm:gap-5">
             {showIcons && (
-              <div className="flex items-center gap-4 text-white">
-                <div className="relative">
+              <div className="flex items-center gap-2 sm:gap-3 text-white">
+                <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-md">
                   <svg
-                    width="24"
-                    height="24"
+                    className="h-5 w-5 opacity-90"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
-                    className="opacity-90"
                   >
                     <path
                       fill="currentColor"
@@ -98,18 +95,17 @@ export default function Navbar({
                     />
                   </svg>
                   {typeof mailBadge === "number" && (
-                    <span className="absolute -top-1 -right-2 rounded-full bg-white px-1.5 text-[10px] font-semibold leading-4 text-[#7CB800] shadow-sm">
+                    <span className="absolute -top-1 -right-1 rounded-full bg-white px-1.5 text-[10px] font-semibold leading-4 text-[#7CB800] shadow-sm">
                       {mailBadge}
                     </span>
                   )}
-                </div>
-                <div className="relative">
+                </span>
+
+                <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-md">
                   <svg
-                    width="24"
-                    height="24"
+                    className="h-5 w-5 opacity-90"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
-                    className="opacity-90"
                   >
                     <path
                       fill="currentColor"
@@ -117,15 +113,16 @@ export default function Navbar({
                     />
                   </svg>
                   {typeof phoneBadge === "number" && (
-                    <span className="absolute -top-1 -right-2 rounded-full bg-white px-1.5 text-[10px] font-semibold leading-4 text-[#7CB800] shadow-sm">
+                    <span className="absolute -top-1 -right-1 rounded-full bg-white px-1.5 text-[10px] font-semibold leading-4 text-[#7CB800] shadow-sm">
                       {phoneBadge}
                     </span>
                   )}
-                </div>
+                </span>
               </div>
             )}
+
             <div className="flex items-center gap-3">
-              <div className="h-12 w-12 overflow-hidden rounded-full">
+              <div className="h-9 w-9 sm:h-12 sm:w-12 overflow-hidden rounded-full shrink-0">
                 <Image
                   src={avatarSrc || "/images/user.webp"}
                   alt={displayName}
