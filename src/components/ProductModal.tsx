@@ -1,7 +1,7 @@
 "use client";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useEffect, useState } from "react";
-import NextImage from "next/image";
+import Image from "next/image";
 
 type Product = {
   codigo: string;
@@ -27,7 +27,10 @@ export default function ProductModal({
     <Dialog open={open} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-lg rounded-2xl bg-white p-6 shadow">
+        <DialogPanel
+          id="product-modal"
+          className="w-full max-w-lg rounded-2xl bg-white p-6 shadow"
+        >
           <DialogTitle className="text-xl font-bold text-black">
             {product.nome
               ? product.nome.charAt(0).toUpperCase() +
@@ -35,11 +38,15 @@ export default function ProductModal({
               : ""}
           </DialogTitle>
 
-          <NextImage
-            src={product.imagem}
-            alt={product.nome}
-            className="mt-3 h-60 w-full rounded object-cover"
-          />
+          <div className="relative mt-3 h-60 w-full overflow-hidden rounded">
+            <Image
+              src={product.imagem}
+              alt={product.nome || "Produto"}
+              fill
+              sizes="(max-width: 640px) 90vw, 600px"
+              className="object-cover"
+            />
+          </div>
 
           <div className="mt-3 text-sm text-gray-600">
             <p>
