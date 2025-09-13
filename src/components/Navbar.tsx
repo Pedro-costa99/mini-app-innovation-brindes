@@ -82,7 +82,7 @@ export default function Navbar({
           </div>
           <div className="flex items-center gap-2 sm:gap-5">
             {showIcons && (
-              <div className="flex items-center gap-2 sm:gap-3 text-white">
+              <div className="flex items-center gap-2 sm:gap-3 text-white mt-2">
                 <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-md">
                   <svg
                     className="h-5 w-5 opacity-90"
