@@ -117,6 +117,27 @@ Essa variável define a URL base para as chamadas de API.
 
 ---
 
+---
+
+## 🧪 Testes (Vitest + React Testing Library)
+
+**Os testes ficam em src/tests com o padrão .test.tsx.**
+Como rodar:
+
+- **modo assistido (watch)**
+npm run test
+
+- **executar uma vez (CI)**
+npm run test:run
+
+- **interface gráfica do Vitest**
+npm run test:ui
+
+- **relatório de cobertura**
+npm run test:cov
+
+---
+
 ## Entrega
 - ✅ Repositório público
 - ⚠️ **README**: screenshot Lighthouse e GIF do fluxo
